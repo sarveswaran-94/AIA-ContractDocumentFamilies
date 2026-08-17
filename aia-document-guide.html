@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AIA Document Index — Dial-In Sheet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@500;700;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3F0E6;
+    --paper-alt:#EAE4D2;
+    --ink:#1B2A38;
+    --ink-soft:#4B5A66;
+    --line:#C9C2AE;
+    --rust:#B84A24;
+    --rust-dim:#B84A2422;
+    --verdigris:#3F6E63;
+    --verdigris-dim:#3F6E6322;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:48px 20px 80px;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:36px 36px;
+    background-position:-1px -1px;
+  }
+  .sheet{
+    max-width:920px;
+    margin:0 auto;
+    background:var(--paper);
+    border:1.5px solid var(--ink);
+    box-shadow:8px 8px 0 var(--rust-dim);
+    position:relative;
+  }
+
+  /* ---------- Titleblock ---------- */
+  .titleblock{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    padding:26px 32px 18px;
+    border-bottom:2.5px solid var(--ink);
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .titleblock h1{
+    font-family:'Big Shoulders',sans-serif;
+    font-weight:900;
+    text-transform:uppercase;
+    font-size:clamp(26px,4.2vw,38px);
+    line-height:0.92;
+    margin:0;
+    letter-spacing:0.5px;
+  }
+  .titleblock .sub{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    letter-spacing:0.03em;
+  }
+  .sheet-no{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    text-align:right;
+    color:var(--ink-soft);
+    line-height:1.6;
+    white-space:nowrap;
+    padding-bottom:2px;
+  }
+
+  .instructions{
+    padding:13px 32px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-bottom:1px solid var(--line);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.01em;
+    line-height:1.6;
+  }
+  .instructions b{ color:var(--rust); }
+
+  /* ---------- Top grid: lock | families ---------- */
+  .top-grid{
+    display:grid;
+    grid-template-columns:272px 1fr;
+    border-bottom:1px solid var(--line);
+  }
+  .lock-col{
+    padding:24px 20px 22px;
+    border-right:1.5px solid var(--ink);
+    background:var(--paper-alt);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .fam-col{
+    padding:16px 0;
+  }
+
+  .shackle-svg{ display:block; margin-bottom:-28px; position:relative; z-index:1; }
+  .lock-body{
+    position:relative;
+    z-index:2;
+    background:var(--paper);
+    border:1.5px solid var(--ink);
+    box-shadow:4px 4px 0 var(--rust-dim);
+    border-radius:4px;
+    padding:16px 12px 12px;
+    display:flex;
+    gap:6px;
+  }
+  @keyframes lockShake{
+    10%, 90% { transform: translateX(-1px); }
+    20%, 80% { transform: translateX(2px); }
+    30%, 50%, 70% { transform: translateX(-5px); }
+    40%, 60% { transform: translateX(5px); }
+  }
+  .lock-body.denied{ animation: lockShake 0.42s ease; }
+  .lock-body.denied .reel-window{
+    border-color:var(--rust);
+    background:var(--rust-dim);
+  }
+  .reel{ display:flex; flex-direction:column; align-items:center; gap:5px; width:52px; }
+  .reel-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:8.5px;
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+  }
+  .reel-btn{
+    background:var(--paper);
+    border:1.5px solid var(--ink);
+    color:var(--ink);
+    width:100%;
+    height:20px;
+    border-radius:3px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;
+    transition:background .15s, color .15s, transform .1s;
+  }
+  .reel-btn:hover{ background:var(--rust); color:var(--paper); border-color:var(--rust); }
+  .reel-btn:active{ transform:scale(0.94); }
+  .reel-window{
+    width:100%;
+    height:50px;
+    background:var(--paper-alt);
+    border:1.5px solid var(--ink);
+    border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:25px;
+    color:var(--ink);
+    user-select:none;
+    transition:background .25s, border-color .25s;
+  }
+  .reel-divider{
+    width:1px;
+    align-self:stretch;
+    background:var(--line);
+    margin-top:16px;
+  }
+  .lock-caption{
+    margin:12px 0 16px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    text-align:center;
+  }
+  .lock-caption b{ color:var(--rust); letter-spacing:0.04em; }
+
+  .result{
+    width:100%;
+    padding:12px 14px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .result.valid{
+    border-color:var(--verdigris);
+    background:var(--verdigris-dim);
+    color:var(--ink);
+  }
+  .result b{ color:var(--rust); }
+
+  /* ---------- Family accordion ---------- */
+  .fam-row{ border-bottom:1px solid var(--line); }
+  .fam-row:last-child{ border-bottom:none; }
+
+  .fam-head{
+    display:grid;
+    grid-template-columns:46px 1fr 30px;
+    align-items:center;
+    gap:14px;
+    padding:13px 24px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .fam-head:hover{ background:rgba(0,0,0,0.02); }
+  .fam-row.open .fam-head{ background:var(--verdigris-dim); }
+
+  .fam-letter{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:18px;
+    width:38px;height:38px;
+    border:1.5px solid var(--ink);
+    background:var(--paper);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--ink-soft);
+  }
+  .fam-row.open .fam-letter, .fam-row.dialed .fam-letter{
+    border-color:var(--rust);
+    color:var(--rust);
+    background:var(--paper);
+  }
+  .fam-name{
+    font-family:'Big Shoulders',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    text-transform:uppercase;
+    letter-spacing:0.01em;
+  }
+  .fam-governs{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:1px;
+  }
+  .fam-toggle{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:17px;
+    text-align:center;
+    color:var(--ink);
+    transition:transform .25s;
+  }
+  .fam-row.open .fam-toggle{ transform:rotate(45deg); }
+
+  .fam-body{
+    display:grid;
+    grid-template-rows:0fr;
+    transition:grid-template-rows .3s ease;
+  }
+  .fam-row.open .fam-body{ grid-template-rows:1fr; }
+  .fam-body-inner{ overflow:hidden; }
+
+  .doc-mini-list{ padding:2px 24px 16px 24px; display:flex; flex-direction:column; gap:6px; }
+  .doc-mini{
+    display:grid;
+    grid-template-columns:56px 1fr;
+    gap:12px;
+    align-items:start;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .doc-mini:hover{ border-color:var(--rust); }
+  .doc-mini.selected{
+    border-color:var(--rust);
+    background:var(--rust-dim);
+  }
+  .doc-mini .code{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:12px;
+    color:var(--rust);
+    border:1px solid var(--rust);
+    text-align:center;
+    padding:3px 0;
+    height:fit-content;
+  }
+  .doc-mini .title{
+    font-family:'Big Shoulders',sans-serif;
+    font-weight:700;
+    font-size:14.5px;
+    text-transform:uppercase;
+  }
+  .doc-mini .desc{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:2px;
+    line-height:1.45;
+  }
+  .doc-mini .bullets{
+    margin:6px 0 0;
+    padding-left:16px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    display:none;
+    flex-direction:column;
+    gap:4px;
+  }
+  .doc-mini .bullets li::marker{ color:var(--rust); }
+  .doc-mini.selected .bullets{ display:flex; }
+
+  /* ---------- Footer key ---------- */
+  .qc-flex{
+    padding:22px 32px 26px;
+    border-top:2.5px solid var(--ink);
+    background:var(--paper-alt);
+  }
+  .qc-flex-title{
+    font-family:'Big Shoulders',sans-serif;
+    font-weight:700;
+    font-size:20px;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    margin-bottom:12px;
+  }
+  .qc-flex-body{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--ink);
+  }
+  .qc-flex-body ul{
+    margin:0;
+    padding-left:18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .qc-flex-body ul li::marker{ color:var(--rust); }
+  .qc-flex-body ul li b{ color:var(--ink); }
+
+  .digit-key{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+  .digit-key .col-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--rust);
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+    margin-bottom:10px;
+  }
+  @media (max-width:700px){
+    .digit-key{ grid-template-columns:1fr; gap:20px; }
+  }
+
+  .footer{
+    padding:18px 32px 24px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    line-height:1.8;
+  }
+  .footer .key-title{
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  .topic-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--rust);
+    border:1px solid var(--rust);
+    padding:4px 10px;
+    margin-bottom:12px;
+  }
+  .footer .byline{
+    margin-top:14px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-soft);
+  }
+
+  @media (max-width:700px){
+    .top-grid{ grid-template-columns:1fr; }
+    .lock-col{ border-right:none; border-bottom:1.5px solid var(--ink); }
+    .titleblock{ padding:20px 18px 14px; flex-direction:column; align-items:flex-start; gap:10px;}
+    .instructions, .footer, .qc-flex{ padding-left:18px; padding-right:18px; }
+    .fam-head{ padding:12px 16px; }
+    .doc-mini-list{ padding:2px 16px 14px 16px; }
+  }
+</style>
+</head>
+<body>
+<script data-goatcounter="https://sarveswaransp.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+<div class="sheet">
+
+  <div style="padding:16px 32px 0;">
+    <span class="topic-tag" style="margin-bottom:0;">Project Management — ARE 5.0</span>
+  </div>
+
+  <div class="titleblock">
+    <div>
+      <h1>AIA Document Index</h1>
+      <div class="sub">Dial-in guide to the six AIA contract-document families</div>
+    </div>
+  </div>
+
+  <div class="instructions">
+    Turn the wheels like a combination lock — <b>first wheel picks the family</b>, the three digit wheels pick the document number. Or open a family at right and tap a document directly.
+  </div>
+
+  <div class="top-grid">
+    <div class="lock-col">
+      <svg class="shackle-svg" width="150" height="62" viewBox="0 -8 150 62" fill="none">
+        <path d="M28 54 V32 C28 11 44 4 75 4 C106 4 122 11 122 32 V54" stroke="#1B2A38" stroke-width="12" stroke-linecap="round"/>
+        <path d="M28 54 V32 C28 11 44 4 75 4 C106 4 122 11 122 32 V54" stroke="#B84A24" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <div class="lock-body" id="lockBody">
+        <div class="reel">
+          <div class="reel-label">Fam.</div>
+          <button class="reel-btn" data-dir="1" data-reel="0">▲</button>
+          <div class="reel-window" id="reelVal0">A</div>
+          <button class="reel-btn" data-dir="-1" data-reel="0">▼</button>
+        </div>
+        <div class="reel-divider"></div>
+        <div class="reel">
+          <div class="reel-label">Type</div>
+          <button class="reel-btn" data-dir="1" data-reel="1">▲</button>
+          <div class="reel-window" id="reelVal1">1</div>
+          <button class="reel-btn" data-dir="-1" data-reel="1">▼</button>
+        </div>
+        <div class="reel">
+          <div class="reel-label">Method</div>
+          <button class="reel-btn" data-dir="1" data-reel="2">▲</button>
+          <div class="reel-window" id="reelVal2">0</div>
+          <button class="reel-btn" data-dir="-1" data-reel="2">▼</button>
+        </div>
+        <div class="reel">
+          <div class="reel-label">Seq.</div>
+          <button class="reel-btn" data-dir="1" data-reel="3">▲</button>
+          <div class="reel-window" id="reelVal3">1</div>
+          <button class="reel-btn" data-dir="-1" data-reel="3">▼</button>
+        </div>
+      </div>
+      <div class="lock-caption">COMBINATION&nbsp; <b id="comboText">A-101</b></div>
+      <div class="result" id="resultStrip"></div>
+    </div>
+
+    <div class="fam-col" id="famCol"></div>
+  </div>
+
+  <div class="qc-flex">
+    <div class="qc-flex-title">Key — What Each Digit Means</div>
+    <div class="qc-flex-body digit-key">
+      <div>
+        <div class="col-title">Digit 1 — Document Type</div>
+        <ul>
+          <li><b>1</b> — Prime agreements</li>
+          <li><b>2</b> — Conditions or scope of the agreements</li>
+          <li><b>3</b> — Bonds or qualifications</li>
+          <li><b>4</b> — Agreements between prime and sub-contractors or sub-consultants</li>
+          <li><b>5</b> — Guides</li>
+          <li><b>6</b> — Reserved for future use</li>
+          <li><b>7</b> — Bid documents and construction forms</li>
+          <li><b>8</b> — Forms or documents specific to the architect</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title">Digit 2 — Delivery Method</div>
+        <ul>
+          <li><b>0–2</b> — Conventional delivery</li>
+          <li><b>3</b> — CM as adviser or CM as constructor</li>
+          <li><b>4</b> — Design-build</li>
+          <li><b>5</b> — Interior only</li>
+          <li><b>6</b> — International</li>
+          <li><b>7</b> — Program management</li>
+          <li><b>8</b> — Reserved for future use</li>
+          <li><b>9</b> — Integrated project delivery</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title">Digit 3 — Sequence</div>
+        <ul>
+          <li>A single digit, 1–9.</li>
+          <li>Tells similar documents apart within the same type and delivery method.</li>
+          <li>Not itself meaningful — it's a tiebreaker, not a category.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="topic-tag">Not Legal Advice</span>
+    <div class="key-title">Reading This Sheet</div>
+    Descriptions are simplified summaries, not official AIA text. AIA documents are copyrighted, licensed forms —
+    get current editions and legal review through AIA Contract Documents before use on an actual project.
+    <div class="byline">By Sarveswaran SP</div>
+  </div>
+
+</div>
+
+<script>
+const DATA = {
+  A: {
+    name: "Owner–Contractor Agreements",
+    governs: "Owner–contractor + General Conditions",
+    docs: [
+      {n:"101", title:"Stipulated Sum", desc:"Fixed lump-sum agreement, common on large, well-defined commercial projects.", bullets:["Priced as a single fixed sum, not cost-based","Suited to complete, well-documented design","Works alongside A201 General Conditions"]},
+      {n:"102", title:"Cost + Fee, GMP", desc:"Cost of the work plus a fee, capped by a guaranteed maximum price.", bullets:["Owner takes on less price risk than pure cost-plus","GMP caps the owner's exposure","Common on large projects with evolving scope"]},
+      {n:"103", title:"Cost + Fee, No GMP", desc:"Same cost-plus-fee structure as A102, without a guaranteed maximum.", bullets:["Used when scope isn't fully known at signing","Not intended for competitive bidding","Requires high trust between owner and contractor"]},
+      {n:"105", title:"Short Form", desc:"Simplified, stand-alone agreement for small, short-duration projects.", bullets:["Includes its own general conditions — no A201 needed","Best for modest scope, stipulated sum work","Fast to execute, light on administration"]},
+      {n:"133", title:"CM as Constructor, GMP", desc:"Owner/construction-manager agreement where the CM holds trade contracts.", bullets:["CM acts as constructor, not just advisor","Guaranteed maximum price caps owner cost","Common on complex, fast-tracked builds"]},
+      {n:"141", title:"Design-Builder Agreement", desc:"Owner agreement with a single design-build entity for design and construction.", bullets:["One point of responsibility for owner","Pairs with A201-style general conditions","Used across large design-build projects"]},
+      {n:"201", title:"General Conditions", desc:"The backbone document — rights, duties, and relationships of owner, contractor, architect.", bullets:["Referenced by most other A-series agreements","Defines claims, changes, and termination process","Rarely used standalone — always incorporated by reference"]}
+    ]
+  },
+  B: {
+    name: "Owner–Architect Agreements",
+    governs: "Owner–architect agreements",
+    docs: [
+      {n:"101", title:"Standard Agreement", desc:"Core owner/architect agreement across five traditional design phases.", bullets:["Schematic design through construction administration","Pairs naturally with A201 and C401","The default choice for typical projects"]},
+      {n:"102", title:"No Predefined Scope", desc:"Flexible agreement for services that don't fit a standard phase structure.", bullets:["Scope of services attached as its own exhibit","Useful for non-traditional or specialized roles","Any project size"]},
+      {n:"103", title:"Complex Project", desc:"B101 adapted for large or complex projects.", bullets:["Handles fast-track or phased delivery","Supports third-party cost estimating","More detailed milestone tracking than B101"]},
+      {n:"104", title:"Abbreviated Agreement", desc:"Condensed agreement for medium projects with limited scope.", bullets:["Shorter than B101, more structure than B105","Fits projects of moderate size and complexity"]},
+      {n:"143", title:"Design-Builder / Architect", desc:"Agreement between a design-builder and the architect it retains.", bullets:["Used inside a design-build delivery structure","Architect reports to the design-builder, not the owner directly"]}
+    ]
+  },
+  C: {
+    name: "Architect–Consultant Agreements",
+    governs: "Architect–consultant + multi-party",
+    docs: [
+      {n:"141", title:"DB Owner–Consultant", desc:"Owner/design-consultant agreement on a design-build project.", bullets:["Used before a design-builder is selected","Bridges early design work into the design-build handoff"]},
+      {n:"191", title:"IPD Multi-Party", desc:"Single agreement binding owner, architect, and contractor together.", bullets:["Integrated Project Delivery structure","Shared risk and reward across all signing parties","One agreement instead of separate contracts"]},
+      {n:"401", title:"Architect–Consultant", desc:"Standard agreement between an architect and its own consultants.", bullets:["Aligned with B101-style owner/architect terms","Covers structural, MEP, and other consultants"]}
+    ]
+  },
+  D: {
+    name: "Industry Guides",
+    governs: "Non-contract reference guides",
+    docs: [
+      {n:"503", title:"Project Delivery Guide", desc:"Non-contract guide to how delivery methods and document families fit together.", bullets:["Not a contract — reference only","Helps choose which A/B/C series documents apply"]}
+    ]
+  },
+  E: {
+    name: "Digital Practice Protocols",
+    governs: "Digital practice protocols",
+    docs: [
+      {n:"203", title:"BIM & Digital Data", desc:"Exhibit setting protocols for building information modeling and shared data.", bullets:["Defines model authorship and reliance","Attaches to B101 or similar owner/architect agreements"]},
+      {n:"204", title:"Sustainable Projects", desc:"Exhibit defining responsibilities for a stated sustainability objective.", bullets:["Pairs with B101/B103 sustainable-objective provisions","Assigns who does what to meet the goal"]}
+    ]
+  },
+  G: {
+    name: "Contract Administration Forms",
+    governs: "Contract administration forms",
+    docs: [
+      {n:"701", title:"Change Order", desc:"Records an agreed change in cost, scope, and time.", bullets:["Signed by owner, architect, and contractor","Amends the contract sum and/or contract time"]},
+      {n:"702", title:"App. & Certificate for Payment", desc:"Contractor's progress-payment request, architect's certification.", bullets:["Pairs with the G703 continuation sheet","Standard monthly billing document"]},
+      {n:"703", title:"Continuation Sheet", desc:"Line-item schedule of values attached to a G702.", bullets:["Breaks payment application down by work item","Always attached, never used alone"]},
+      {n:"704", title:"Certificate of Substantial Completion", desc:"Certifies the date a project is ready for its intended use.", bullets:["Starts warranty periods and retainage release","Can apply to a defined portion of the work"]},
+      {n:"705", title:"List of Subcontractors", desc:"Contractor's disclosure of proposed subcontractors.", bullets:["Often required before contract execution","Owner/architect review before work begins"]},
+      {n:"706", title:"Contractor's Affidavit of Payment", desc:"Sworn statement that project debts and claims are paid.", bullets:["Supports final payment release","Protects owner from later lien claims"]},
+      {n:"707", title:"Consent of Surety", desc:"Surety's consent allowing final payment to the contractor.", bullets:["Required when a bond is in place","Confirms the bond stays intact after final payment"]},
+      {n:"710", title:"Architect's Supplemental Instructions", desc:"Minor clarifications that don't change cost or time.", bullets:["Not a change order — no cost/time impact","Used for small clarifications during construction"]}
+    ]
+  }
+};
+
+const FAMILY_ORDER = ["A","B","C","D","E","G"];
+let state = { letterIdx: 0, digits: [1,0,1], openLetter: "A" };
+
+const pad = (list, idx) => ((idx % list.length) + list.length) % list.length;
+const currentFamily = () => FAMILY_ORDER[state.letterIdx];
+const currentCode = () => state.digits.join("");
+const findDoc = () => DATA[currentFamily()].docs.find(d => d.n === currentCode()) || null;
+
+function render(){
+  const fam = currentFamily();
+  document.getElementById("reelVal0").textContent = fam;
+  document.getElementById("reelVal1").textContent = state.digits[0];
+  document.getElementById("reelVal2").textContent = state.digits[1];
+  document.getElementById("reelVal3").textContent = state.digits[2];
+  document.getElementById("comboText").textContent = fam + "-" + currentCode();
+
+  const doc = findDoc();
+  const strip = document.getElementById("resultStrip");
+  if(doc){
+    strip.className = "result valid";
+    strip.innerHTML = `<b>${fam}${doc.n}</b> — ${doc.title}. ${doc.desc}`;
+  } else {
+    strip.className = "result";
+    strip.innerHTML = `No document sits at <b>${fam}-${currentCode()}</b>. Keep turning, or open a family at right.`;
+  }
+
+  renderFamilies();
+}
+
+function renderFamilies(){
+  const fam = currentFamily();
+  const col = document.getElementById("famCol");
+  col.innerHTML = "";
+  FAMILY_ORDER.forEach(letter => {
+    const d = DATA[letter];
+    const isOpen = letter === state.openLetter;
+    const isDialed = letter === fam;
+    const row = document.createElement("div");
+    row.className = "fam-row" + (isOpen ? " open" : "") + (isDialed ? " dialed" : "");
+    row.innerHTML = `
+      <div class="fam-head">
+        <div class="fam-letter">${letter}</div>
+        <div>
+          <div class="fam-name">${d.name}</div>
+          <div class="fam-governs">${d.governs} · ${d.docs.length} shown</div>
+        </div>
+        <div class="fam-toggle">+</div>
+      </div>
+      <div class="fam-body"><div class="fam-body-inner">
+        <div class="doc-mini-list">
+          ${d.docs.map(doc => `
+            <div class="doc-mini${(letter===fam && doc.n===currentCode()) ? ' selected' : ''}" data-letter="${letter}" data-code="${doc.n}">
+              <div class="code">${letter}${doc.n}</div>
+              <div>
+                <div class="title">${doc.title}</div>
+                <div class="desc">${doc.desc}</div>
+                <ul class="bullets">${doc.bullets.map(b => `<li>${b}</li>`).join("")}</ul>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      </div></div>
+    `;
+    row.querySelector(".fam-head").addEventListener("click", () => {
+      if(state.openLetter === letter){
+        state.openLetter = null;
+        render();
+        return;
+      }
+      state.openLetter = letter;
+      state.letterIdx = FAMILY_ORDER.indexOf(letter);
+      const firstDoc = DATA[letter].docs[0];
+      if(!DATA[letter].docs.find(x => x.n === currentCode())){
+        state.digits = firstDoc.n.split("").map(Number);
+      }
+      render();
+    });
+    row.querySelectorAll(".doc-mini").forEach(el => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const letter2 = el.dataset.letter;
+        const code = el.dataset.code;
+        state.letterIdx = FAMILY_ORDER.indexOf(letter2);
+        state.openLetter = letter2;
+        state.digits = code.split("").map(Number);
+        render();
+      });
+    });
+    col.appendChild(row);
+  });
+}
+
+function shakeIfInvalid(){
+  if(findDoc()) return;
+  const body = document.getElementById("lockBody");
+  body.classList.remove("denied");
+  void body.offsetWidth; // restart animation
+  body.classList.add("denied");
+  clearTimeout(shakeIfInvalid._t);
+  shakeIfInvalid._t = setTimeout(() => body.classList.remove("denied"), 450);
+}
+
+document.querySelectorAll(".reel-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const reel = Number(btn.dataset.reel);
+    const dir = Number(btn.dataset.dir);
+    if(reel === 0){
+      state.letterIdx = pad(FAMILY_ORDER, state.letterIdx + dir);
+      state.openLetter = currentFamily();
+      const famData = DATA[currentFamily()];
+      if(!famData.docs.find(d => d.n === currentCode())){
+        state.digits = famData.docs[0].n.split("").map(Number);
+      }
+    } else {
+      const i = reel - 1;
+      state.digits[i] = (state.digits[i] + dir + 10) % 10;
+    }
+    render();
+    shakeIfInvalid();
+  });
+});
+
+render();
+</script>
+</body>
+</html>
